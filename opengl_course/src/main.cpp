@@ -7,8 +7,13 @@
 
 
 
-uint32_t shader;
+uint32_t shader , XUniform , YUniform;
 unsigned int VAO, VBO;
+
+bool direction = true;
+float MaxOffset = 0.5f;
+float TriOffset = 0.0f;
+float triincrement = 0.007f;
 
 
 float positions[]
@@ -21,11 +26,15 @@ float positions[]
 static const char* vShader = "                                                \n\
 #version 330                                                                  \n\
                                                                               \n\
-layout (location = 0) in vec3 pos;											  \n\
-                                                                              \n\
+layout (location = 0) in vec3 pos;						                      \n\                                                     \n\
+					                                                          \n\
+uniform float XMove;					                                      \n\
+uniform float YMove;					                                      \n\
+					                                                          \n\
+					                                                          \n\
 void main()                                                                   \n\
 {                                                                             \n\
-    gl_Position = vec4(0.4 * pos.x, 0.4 * pos.y, pos.z, 1.0);				  \n\
+    gl_Position = vec4(0.4 * pos.x + XMove, 0.4 * pos.y +YMove, pos.z, 1.0);  \n\
 }";
 
 // Fragment Shader
@@ -162,6 +171,9 @@ static void CompileShader()
 
     }
 
+    XUniform = glGetUniformLocation(shader, "XMove");
+    YUniform = glGetUniformLocation(shader, "YMove");
+
 }
 
 
@@ -179,12 +191,32 @@ int main() {
     
 
     // the main loop for the program
-    while (!MOX.mxShouldClose()) {
+    while (!MOX.mxShouldClose()) 
+    {
+        MOX.mxPollEvents();
+
+        
+
+        if (direction)
+        {
+            TriOffset += triincrement;
+        }
+        else {
+            TriOffset -= triincrement;
+        }
+
+        if (abs(TriOffset) >= MaxOffset)
+        {
+            direction = !direction;
+        }
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shader);
+
+        glUniform1f(XUniform, TriOffset);
+        glUniform1f(YUniform, TriOffset);
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -195,7 +227,7 @@ int main() {
         
 
         MOX.mxSwapBuffer();
-        MOX.mxPollEvents();
+        
     }
 
 
