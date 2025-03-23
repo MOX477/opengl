@@ -6,16 +6,15 @@
 #include <GLFW/glfw3.h>
 
 
+//making variables 
+uint32_t shader , XUniform , YUniform , VAO, VBO;
 
-uint32_t shader , XUniform , YUniform;
-unsigned int VAO, VBO;
-
+//making the variables for movment
 bool direction = true;
-float MaxOffset = 0.5f;
-float TriOffset = 0.0f;
-float triincrement = 0.007f;
+float MaxOffset = 0.5f , triincrement = 0.007f , TriOffset = 0.0f;
 
 
+//setting the position of verticies
 float positions[]
 {
     -1.0f,-1.0f,0.0f,
@@ -55,8 +54,6 @@ static void CreateTriangle(float verticies[])
     
     // generate and bind VAO
     glGenVertexArrays(1, &VAO);
-    
-
     glBindVertexArray(VAO);
 
     // generate and bind VBO
@@ -76,14 +73,15 @@ static void CreateTriangle(float verticies[])
 }
 
 // Callback function to handle window resize
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
     glViewport(0, 0, width, height);
 }
 
 //Create and Attach Shader to the Program
 static void Shader(uint32_t program, const char* ShaderCode, GLenum ShaderType)
 {
-    //allocate shader and return id to it
+    //allocate memory to the shader and store id for it
     unsigned int Shader = glCreateShader(ShaderType);
 
     //take the code length
@@ -114,6 +112,8 @@ static void Shader(uint32_t program, const char* ShaderCode, GLenum ShaderType)
         }
 
     }
+
+    //attaching the shader to to program
     glAttachShader(program, Shader);
 
 
@@ -135,8 +135,8 @@ static void CompileShader()
     Shader(shader, fShader, GL_FRAGMENT_SHADER);
 
     //Link the program after attaching the shaders
-    int result;
     glLinkProgram(shader);
+    int result;
     glGetProgramiv(shader, GL_LINK_STATUS, &result);
     if (result == GL_FALSE)
     {
@@ -171,6 +171,7 @@ static void CompileShader()
 
     }
 
+    //getting up the uniform location
     XUniform = glGetUniformLocation(shader, "XMove");
     YUniform = glGetUniformLocation(shader, "YMove");
 
@@ -179,13 +180,15 @@ static void CompileShader()
 
 //the main func of the exe
 int main() {
-    uint32_t m_width = 800, m_height = 600;
+    uint16_t m_width = 800, m_height = 600;
    //creating the object mox from the window class to create a window
     Window MOX(m_width, m_height, "MOX", 3,3);
    
     // Set callback for window resizing
     glfwSetFramebufferSizeCallback(MOX.mxGetWindow(), framebuffer_size_callback);
+    //setting the viewport
     glViewport(0, 0, m_width, m_height);
+    //creating the vbo and vao and shaders
     CreateTriangle(positions);
     CompileShader();
     

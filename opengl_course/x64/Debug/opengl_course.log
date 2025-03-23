@@ -1,5 +1,0 @@
-﻿  Window.cpp
-  main.cpp
-P:\dev\course\opengl_course\opengl_course\src\main.cpp(80,24): warning C4267: 'initializing': conversion from 'size_t' to 'int32_t', possible loss of data
-  Generating Code...
-  opengl_course.vcxproj -> P:\dev\course\opengl_course\x64\Debug\opengl_course.exe
