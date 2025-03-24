@@ -3,6 +3,9 @@
 
 //making variables 
 uint32_t shader , UniformModel , VAO, VBO;
+//make the angle to radians 
+const float MRadians = 3.141592f / 180.0;
+float Cangle = 0.0f;
 
 //making the variables for movment
 bool direction = true;
@@ -223,7 +226,10 @@ int main() {
         {
             direction = !direction;
         }
-
+        Cangle += 1.0f;
+        if (Cangle >= 360)
+            Cangle -= 360;
+        std::cout << Cangle << std::endl;
 
 		//clear the color buffer and set the color to black
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -235,6 +241,7 @@ int main() {
 		//handel the model matrix
 		glm::mat4  model(1.0f);
 		model = glm::translate(model, glm::vec3(TriOffset, TriOffset, 0.0f));
+        model = glm::rotate(model, Cangle * MRadians , glm::vec3(0.0f,0.0f,1.0f));
 		glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
 		//binding the VAO
