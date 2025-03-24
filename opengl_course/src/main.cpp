@@ -1,42 +1,36 @@
-#define GLEW_STATIC
-#include <Window.h>
-#include <iostream>
-#include <stdio.h>
-#include "glm/glm.hpp"
-#include "glm\gtc\matrix_transform.hpp"
-#include "glm\gtc\type_ptr.hpp"
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include "h.h"
 
 
 //making variables 
-uint32_t shader , XUniform , YUniform , VAO, VBO;
+uint32_t shader , UniformModel , VAO, VBO;
 
 //making the variables for movment
 bool direction = true;
-float MaxOffset = 0.5f , triincrement = 0.007f , TriOffset = 0.0f;
+float MaxOffset = 0.6f , triincrement = 0.007f , TriOffset = 0.0f;
 
 
 //setting the position of verticies
-float positions[]
-{
+float positions[]{
     -1.0f,-1.0f,0.0f,
      1.0f,-1.0f,0.0f,
      0.0f, 1.0f,0.0f
 };
+
+
+
 // Vertex Shader code
 static const char* vShader = "                                                \n\
 #version 330                                                                  \n\
                                                                               \n\
 layout (location = 0) in vec3 pos;						                      \n\                                                     \n\
 					                                                          \n\
-uniform float XMove;					                                      \n\
-uniform float YMove;					                                      \n\
+uniform mat4 model;					                                           \n\
+					                                                          \n\
 					                                                          \n\
 					                                                          \n\
 void main()                                                                   \n\
 {                                                                             \n\
-    gl_Position = vec4(0.4 * pos.x + XMove, 0.4 * pos.y +YMove, pos.z, 1.0);  \n\
+    gl_Position = model * vec4(0.4 * pos.x, 0.4 * pos.y, pos.z, 1.0);          \n\
 }";
 
 // Fragment Shader
@@ -75,11 +69,17 @@ static void CreateTriangle(float verticies[])
 
 }
 
+
+
+
 // Callback function to handle window resize
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
+
+
+
 
 //Create and Attach Shader to the Program
 static void Shader(uint32_t program, const char* ShaderCode, GLenum ShaderType)
@@ -121,6 +121,9 @@ static void Shader(uint32_t program, const char* ShaderCode, GLenum ShaderType)
 
 
 }
+
+
+
 
 //Create Program and Attach Shader to it (VertexShdaer , FragmentShader)
 static void CompileShader()
@@ -175,10 +178,12 @@ static void CompileShader()
     }
 
     //getting up the uniform location
-    XUniform = glGetUniformLocation(shader, "XMove");
-    YUniform = glGetUniformLocation(shader, "YMove");
+    UniformModel = glGetUniformLocation(shader, "model");
+    
 
 }
+
+
 
 
 //the main func of the exe
@@ -187,10 +192,15 @@ int main() {
    //creating the object mox from the window class to create a window
     Window MOX(m_width, m_height, "MOX", 3,3);
    
+
     // Set callback for window resizing
     glfwSetFramebufferSizeCallback(MOX.mxGetWindow(), framebuffer_size_callback);
+
+
     //setting the viewport
     glViewport(0, 0, m_width, m_height);
+
+
     //creating the vbo and vao and shaders
     CreateTriangle(positions);
     CompileShader();
@@ -201,8 +211,7 @@ int main() {
     {
         MOX.mxPollEvents();
 
-        
-
+		//handel the the direction and the offset of the triangle
         if (direction)
         {
             TriOffset += triincrement;
@@ -210,28 +219,36 @@ int main() {
         else {
             TriOffset -= triincrement;
         }
-
         if (abs(TriOffset) >= MaxOffset)
         {
             direction = !direction;
         }
 
+
+		//clear the color buffer and set the color to black
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+		//useing the shader program
         glUseProgram(shader);
+        
+		//handel the model matrix
+		glm::mat4  model(1.0f);
+		model = glm::translate(model, glm::vec3(TriOffset, TriOffset, 0.0f));
+		glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
-        glUniform1f(XUniform, TriOffset);
-        glUniform1f(YUniform, TriOffset);
-
+		//binding the VAO
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
 
+		//drwaw the triangle
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		//terminate the used dependencies
+        glBindVertexArray(0);
         glUseProgram(0);
 
         
-
+		//swap the buffer
         MOX.mxSwapBuffer();
         
     }
